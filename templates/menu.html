@@ -1,0 +1,52 @@
+{% include "header.html" %}
+{% include "sidebar.html" %}
+    <body>  
+    <style>
+        body {
+          padding-top: 70px;}
+    </style>      
+        <section class="contain">
+            <h1 class="titrePage">Bonjour,</h1>
+            <section class="bloc" action = "http://localhost:5000" method = "post">
+                <h4 id="titreMenu">MENU</h4>
+                <div class="sousbloc">
+
+                        <div class="box">
+                            <a href="{{url_for('index', username=username)}}"><button class="bouttonMenu" id="btnIndex">Mes questions</button></a>
+                        </div>
+
+                        <div class="box">
+                            <a href="{{url_for('sequence', username=username)}}"><button class="bouttonMenu" id="btnSequence">Mes séquences</button></a>
+                        </div>
+                </div>
+                <div class="sousbloc">
+
+                        <div class="box">
+                            <a href="{{url_for('exporter', username=username)}}"><button class="bouttonMenu" id="btnExporter">Exporter un questionnaire</button></a>
+                        </div>
+
+
+                        <div class="box">
+                            <a href="{{url_for('diffuser', username=username)}}"><button class="bouttonMenu" id="btnQuestionnaire">Diffuser un<br>questionnaire</button></a>
+                        </div>
+
+                </div>
+                <div class="sousbloc">
+
+                        <div class="box">
+                            <a href="{{url_for('gestion', username=username)}}"><button class="bouttonMenu" id="btnClasse">Mes classes</button></a>
+                        </div>
+
+
+                        <div class="box">
+                            <a href="{{url_for('compte', username=username)}}"><button class="bouttonMenu" id="btnCompte">Mon compte</button></a>
+                        </div>
+
+                </div>
+            </section>
+            <div class="bouttonRetour">
+                <p></p>
+                <p><a href="{{url_for('login', username=username)}}" class="lienRetour">Déconnexion</a></p>
+            </div>
+        </section>
+{% include "footer.html" %}

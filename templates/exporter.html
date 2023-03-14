@@ -1,0 +1,75 @@
+{% include "header.html" %}
+   <body>        
+      <section class="contain">
+            <h1 class="titrePage">Exporter un questionnaire : </h1>
+            <div class="filtre">
+            <section action = "http://localhost:5000" method = "POST">
+                <select data-placeholder="Filtrer Tag" multiple class="filtreEtiquette" name="filtreEtiquette" id="filtreEtiquette">
+                    <option value=""></option>
+                    {% for i in range((liste_etiquette |length)) %}
+                    <option>{{liste_etiquette[i] | safe}}</option>
+                    {% endfor %}
+                </select>
+                <button class="bouttonCourt" id="btnFiltre" type="button" onclick="filtre();">Filtrer</button> 
+            </div>
+                <form>
+
+                    <p>Cochez les questions que vous souhaitez intégrer dans votre questionnaire</p>
+
+                    {% for i in range (questionnaire |length) %}
+                    <div class="all {% for j in range((questionnaire[i]['etiquette'] |length)) %}
+                    {{questionnaire[i]['etiquette'][j] | safe}}
+                    {% endfor %}">
+                        <section class="encadrer">
+
+                            <h4 class="question">Question {{i+1}}</h4>
+
+                            <h6 class="l_etiquette">Etiquettes : 
+                                {% for j in range((questionnaire[i]['etiquette'] |length)) %}
+                            
+                                    #{{questionnaire[i]['etiquette'][j]}} 
+                                    {% endfor %}
+                            </h6>
+
+
+                            <section class ="enonce">
+                                <div class="titreEnonce">
+                                    <h5>Enoncé :</h5>
+                                </div>
+                                <div class="valEnonce">
+                                    <p>{{questionnaire[i]['enonce'] | safe}}</p> <!--Affiche le premier élément de la liste de la valeur associé à la clé (l'énoncé) sous format markdown-->
+                                </div>
+                            </section>
+
+
+                            <section class ="reponse">
+                                {% for j in range((questionnaire[i]['reponse'] |length)) %}
+                                    <section class="blocReponse">
+                                        <div class="titreReponse">
+                                            Réponse {% if questionnaire[i]['type']=="choixMultiple"%} {{j+1}} {% endif %}:
+                                        </div>
+                                        <div class="valReponse">
+                                            {{questionnaire[i]['reponse'][j][0] | safe}} <!--Affiche les réponses-->
+                                        </div>
+                                    </section>
+                                {% endfor %}
+                            </section>
+
+                            <p><input id="selection" type = "checkbox" name="{{questionnaire[i]['id']}}"> </p>
+
+                        </section>
+                        </div>   
+                    {% endfor %}
+
+                    <p>Pour revenir en arrière à la page suivante, cliquez sur "Questionnaire"</p>    
+                    <button class="bouttonLong" id="xprtQuestionnaire">Créer le questionnaire</button>
+                </form>
+
+
+                <div class="bouttonRetour">
+                    <p><a href="{{url_for('menu', username=username)}}" class="lienRetour">Retour</a></p>
+                    <p><a href="{{url_for('login')}}" class="lienRetour">Déconnexion</a></p>
+                 </div>
+            </section>
+        </section>
+{% include "footer.html" %}

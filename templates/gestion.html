@@ -1,0 +1,42 @@
+{% include "header.html" %}
+    <body>
+            <section action = "http://localhost:5000">
+                <section class="blocClasse">
+                    <h1 class="titrePage">Mes classes :</h1>
+                    {% for cle in liste_effectif %}
+                        <h4 id="centrer">{{cle}}</h4>
+                        <ul class="ulListeEleve">
+                        {% for i in range(liste_effectif[cle] | length)%}
+                            <li class="liListeEleve">{{liste_effectif[cle][i][0]}} {{liste_effectif[cle][i][1]}}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endfor %}
+                </section>
+                <section class="blocAjout">
+                    <h2 id="ajtNVClasse">Ajouter une nouvelle classe :</h2>
+                    <form method=post enctype=multipart/form-data>
+                        <div id="cadreFile">
+                            
+                            <input type="file" name="file" accept=".csv" id="inputCSV">
+                        </div>
+                        <div id="cadreEnvoi">
+                            <button id="envoiFile">Envoyer</button>
+                        </div>
+                    </form>
+                    <div >
+                        <ul id="recommandation">
+                            <li>Le fichier doit-être au format .csv</li>
+                            <li>Il doit être de la forme : "identifiant";"Nom";"Prénom";...</li>
+                            <li>Et doit contenir au minimum le numéro étudiant unique de l'élève</li>
+                            <p></p>
+                            <li>Une fois terminé, chaque élève aura un compte avec pour identifiant et mot de passe temporaire son numéro d'étudiant </li>
+                        </ul>
+                    </div>
+                </section>
+                <div class="bouttonRetour" id="sansContain">
+                    <p><a href="{{url_for('menu', username=username)}}" class="lienRetour">Retour</a></p>
+                  <p><a href="{{url_for('login')}}" class="lienRetour">Déconnexion</a></p>
+                </div>
+            </section>
+    </body>
+{% include "footer.html" %}

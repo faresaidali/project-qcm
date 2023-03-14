@@ -1,0 +1,83 @@
+{% include "header.html" %}
+{% include "sidebar.html" %}
+    <body>
+     
+        <section class="contain">
+            <h1 class="titrePage">Vos Questions :</h1>
+            <div class="filtre">
+                <select data-placeholder="Filtrer Tag" multiple class="filtreEtiquette" name="filtreEtiquette" id="filtreEtiquette">
+                    <option value=""></option>
+                    {% for i in range((liste_etiquette |length)) %}
+                    <option>{{liste_etiquette[i] | safe}}</option>
+                    {% endfor %}
+                </select>
+                <button class="bouttonCourt" id="btnFiltre" type="button" onclick="filtre();">Filtrer</button>
+            </div>
+            <section action = "http://localhost:5000" method = "post">
+                {% for i in range (questionnaire |length) %} <!--Boucle python-->
+                {% if questionnaire[i]["type"] == "choixMultiple" or questionnaire[i]["type"] == "numerique"%}
+                    <div class="all {% for j in range((questionnaire[i]['etiquette'] |length)) %}
+                                              {{questionnaire[i]['etiquette'][j] | safe}}
+                                              {% endfor %}">
+                    <section  class="encadrer">
+  
+                        <h4 class="question">Question :</h4>
+                        <h6 class="l_etiquette">Identifiant : {{questionnaire[i]['id']}}</h6>
+                        <h6 class="l_etiquette">
+                        Etiquettes : 
+                        {% for j in range((questionnaire[i]['etiquette'] |length)) %}
+                            
+                            #{{questionnaire[i]['etiquette'][j]}} 
+                        {% endfor %}
+                        </h6>
+
+                        <section class ="enonce">
+                            <div class="titreEnonce">
+                            <h5>Enoncé :</h5>
+                            </div>
+                            <div class="valEnonce">
+                                <p>{{questionnaire[i]['enonce'] | safe}}</p> <!--Affiche le premier élément de la liste de la valeur associé à la clé (l'énoncé) sous format markdown-->
+                            </div>
+                        </section>
+
+                        <section class ="reponse">
+                            {% for j in range((questionnaire[i]['reponse'] |length)) %}
+                                <div class="blocReponse">
+                                    <div class="titreReponse">
+                                        Réponse {{j+1}}:
+                                    </div>
+                                    <div class="valReponse">
+                                        {{questionnaire[i]['reponse'][j][0] | safe}} <!--Affiche les réponses-->
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </section>
+     
+                    </section>
+
+                    <section class="boxPetitBoutton">
+                        <div>
+                            <form id="modi">
+                                <button class = "bouttonCourt" id="modifQuestion"><a href ="{{url_for('modifier', username = username, nom_question_a_modifier = questionnaire[i]['id'])}}">Modifier</a></button>
+                            </form>
+                        </div>
+                        <div>
+                            <form id="modi">
+                                <input id = "modi" hidden type="text" name="doSUPP" value="2"/>
+                                <input id="modi" hidden type="text" name="numSUPP" value="{{questionnaire[i]['id']}}"/>
+                                <button class="bouttonCourt" id="suppQuestion">Supprimer</button>
+                            </form>
+                        </div>
+                    </section>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            
+                <a href="{{url_for('ajouter',username = username)}}"><button class="bouttonLong" id="nvQuestion">Nouvelle Question</button></a>
+                <div class="bouttonRetour">
+                    <p><a href="{{url_for('menu', username=username)}}" class="lienRetour">Retour</a></p>
+                  <p><a href="{{url_for('login')}}" class="lienRetour">Déconnexion</a></p>
+                </div>
+            </section>
+        </section>
+{% include "footer.html" %}

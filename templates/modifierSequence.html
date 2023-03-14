@@ -1,0 +1,102 @@
+{% include "header.html" %}
+  <body>
+    <section action = "http://localhost:5000">
+      <section class="blocNvSequ">
+      <form method = "POST" class="formSequence" id="modi">
+        <h3 id="sousTitre">Modifier Séquence {{id_sequence}}</h3>
+        <p id="justifie" style="font-size: 0.7em;">Une séquence est un assemblage de question. Veuillez les selectionner pour les insérer.</p>
+        <input hidden type="text" id = "nb_quest_sequence" name = "nb_quest_sequence" value="{{nb_question + 1}}" style="display: none;">
+        <p id="centrer">Nom :</p>
+        <input type="text" name="nom" id="modi" class="sequName" value="{{val_nom}}" />
+        <select data-placeholder="Choisissez ou creer vos Etiquettes" multiple class="etiquette" name="etiquette" id="etiquette">
+          <option value=""></option>
+          {% for i in range((liste_etiquette |length)) %}
+            {% if liste_etiquette[i] in etiquettes %}
+              <option selected>{{liste_etiquette[i] | safe}}</option>
+            {% else %}
+              <option>{{liste_etiquette[i] | safe}}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+        <div id="selectSequence">
+          {% for i in range(nb_question) %}
+          <select name="{{'sequence' + (i+1) | string}}" class="nvChoix" id= "{{'sequence' + (i+1) | string}}" onchange="nvQ()">
+            <option value="">Id de la question</option>
+            {% for j in range((liste_question |length)) %}
+              {% if liste_question[j] == val_question[i] %}
+                <option selected>{{liste_question[j] | safe}}</option>
+              {% else %}
+                <option>{{liste_question[j] | safe}}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+          {% endfor %}
+          <select name="{{'sequence' + (nb_question +1) | string}}" class="nvChoix" id= "{{'sequence' + (nb_question +1) | string}}" onchange="nvQ()">
+            <option value="">Id de la question</option>
+            {% for i in range((liste_question |length)) %}
+              <option>{{liste_question[i] | safe}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <p id="centrer">Commentaire :</p>
+        <textarea name="com">{{val_com}}</textarea>
+        <button class="bouttonLong">Modifier la séquence</button> 
+      </form>
+      </section>
+      <h1 style="margin-left: 30%;">Modifier une Séquence :</h1>
+      <section class="blocQuestion">
+        <div class="filtre">
+          <select data-placeholder="Filtrer Tag" multiple class="filtreEtiquette" name="filtreEtiquette" id="filtreEtiquette">
+              <option value=""></option>
+              {% for i in range((liste_etiquette |length)) %}
+              <option>{{liste_etiquette[i] | safe}}</option>
+              {% endfor %}
+          </select>
+          <button class="bouttonCourt" id="btnFiltre" type="button" onclick="filtre();">Filtrer</button>
+        </div>
+        {% for i in range (questionnaire |length) %} <!--Boucle python-->
+          {% if questionnaire[i]["type"] == "choixMultiple" or questionnaire[i]["type"] == "numerique"%}
+            <div class="all {% for j in range((questionnaire[i]['etiquette'] |length)) %}
+                                              {{questionnaire[i]['etiquette'][j] | safe}}
+                                              {% endfor %}">
+              <section  class="encadrer">
+                <h4 class="question">Question {{i+1}}</h4>
+                  <h6 style="margin-left: 10px;">Identifiant : {{questionnaire[i]['id']}}</h6>
+                  <h6 class="l_etiquette">
+                    Etiquettes : 
+                    {% for j in range((questionnaire[i]['etiquette'] |length)) %}
+                      #{{questionnaire[i]['etiquette'][j]}} 
+                    {% endfor %}
+                  </h6>
+                  <section class ="enonce">
+                    <div class="titreEnonce">
+                      <h5>Enoncé :</h5>
+                    </div>
+                    <div class="valEnonce">
+                      <p>{{questionnaire[i]['enonce'] | safe}}</p> <!--Affiche le premier élément de la liste de la valeur associé à la clé (l'énoncé) sous format markdown-->
+                    </div>
+                  </section>
+                  <section class ="reponse">
+                    {% for j in range((questionnaire[i]['reponse'] |length)) %}
+                      <div class="blocReponse">
+                        <div class="titreReponse">
+                          Réponse {{j+1}}:
+                        </div>
+                        <div class="valReponse">
+                          {{questionnaire[i]['reponse'][j][0] | safe}} <!--Affiche les réponses-->
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </section>
+                </section>
+              </div>   
+          {% endif %}
+        {% endfor %}
+      </section>
+      <div class="bouttonRetour" id="sansContain">
+        <p><a href="{{url_for('menu', username=username)}}" class="lienRetour">Retour</a></p>
+      <p><a href="{{url_for('login')}}" class="lienRetour">Déconnexion</a></p>
+    </div>
+    </section>
+  </body>
+{%include "footer.html" %}

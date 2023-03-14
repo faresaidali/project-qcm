@@ -1,0 +1,8 @@
+Flask
+Markdown<3.2
+md_mermaid
+mermaid
+simple-websocket
+python-engineio
+python-socketio  
+flask-socketio

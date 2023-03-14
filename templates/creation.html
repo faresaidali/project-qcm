@@ -1,0 +1,34 @@
+{% include "header.html" %}
+    <body>
+        <section class="contain">
+            <h1 class="titrePage">Récapitulatif :</h1>
+            <p class="warning">Les élèves dont le nom est en <em>italique</em> ont un identifiant qui sert déjà d'identifiant à un autre utilisateur (possiblement votre élève). Sans modification du fichier source de votre part, son compte ne sera pas créer. En revanche ils feront désormais partie de vos effectifs</p>
+            <p class="warning">Ceux dont le nom est en <b>gras</b>, ont d'après le fichier source un identifiant commun à un autre élève. Sans modification de votre part seul le dernier se verra créer un compte.</p>
+            <section action = "http://localhost:5000">
+                {% for eleve in liste_eleve %}
+                <section class="encadrer" id="cadreCrea">
+                    <p class="nomEleve">
+                        {% if eleve[0] in liste_doublon%}<b class="brouge">{% endif %}
+                        {% if eleve[0] in liste_ID_deja_existant%}<span class="emorange">{% endif %}
+                        Elève : {{eleve[1]}} {{eleve[2]}}
+                        {% if eleve[0] in liste_ID_deja_existant%}</span>{% endif %}
+                        {% if eleve[0] in liste_doublon%}</b>{% endif %}
+                    </p>
+                    <div class="creationIDEleve">
+                        <p>Identifiant : {{eleve[0]}}</p><p>Mot de passe provisoire : {{eleve[0]}}</p>
+                    </div>
+                </section>
+                {% endfor %}
+                <form method=post enctype=multipart/form-data i="modi">
+                    <h5 id="centrer">Nom de la classe :</h5>
+                    <input type="text" required name="nom_classe">
+                    <input id="modi" hidden type="text" value="2" name="action" class="aCacher"/>
+                    <button class="bouttonLong" id="valider">Valider</button>
+                </form>
+                <p class="warning" id="centrer">Il est impossible d'ajouter un élève dans une classe dont il est déjà membre</p>
+                <button class="bouttonLong" id="retourCrea">
+                    <a href="{{url_for('gestion', username = username)}}">Retour</a>
+                </button>
+            </section>
+        </section>
+{% include "footer.html" %}

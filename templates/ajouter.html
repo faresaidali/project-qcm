@@ -1,0 +1,58 @@
+{% include "header.html" %}
+<body>        
+  <section class="contain">
+   <h1 class="titrePage">Ajouter une question : </h1>
+   <section action = "http://localhost:5000" method = "POST">
+    <form method = "POST">
+
+      <div id="commun">
+         <select data-placeholder="Choisissez ou creer vos Etiquettes" multiple class="etiquette" name="etiquette" id="etiquette">
+          <option value=""></option>
+          {% for i in range((liste_etiquette |length)) %}
+          <option>{{liste_etiquette[i] | safe}}</option>
+          {% endfor %}
+        </select>
+        <h5 class="nomAEcarter">Enoncé :</h5>
+        <textarea  required name = "enon" id="enon"></textarea>
+      </div>
+      <div id="type_q">
+        <h3> Choisissez votre type de question </h3>
+        <button id="btnQCM" type="button" onclick="qcm()"> QCM </button>
+        <button id="btnNum" type="button" onclick="num()"> Numerique </button>
+      </div>
+      
+     <div id="qcm">
+       <h5 class="nomAEcarter">Réponse :</h5>
+       <section id="reponses" class="saisirReponse">
+        {% for i in range(2) %}
+        <div class="elementReponse" id="{{'elementReponse'+((i+1)|string)}}">
+          <input type ="checkbox" name="{{'checkbox'+((i+1)|string)}}" id="{{'checkbox'+((i+1)|string)}}"/><span class="checkmark"></span>
+          <textarea  name = "{{'rep'+((i+1)|string)}}" id="{{'rep'+((i+1)|string)}}"></textarea>
+          <button class = "bouttonSUPP" name="{{'btn'+((i+1)|string)}}" type="button" id="{{'btn'+((i+1)|string)}}" onclick="supp(this.id);">SUPP</button>
+        </div>
+        {% endfor%}
+      </section>
+      <input id="nb_quest" type="text" name="nb_quest" value="2">
+      <button class="bouttonLong" id="addDiv" type="button">Nouvelle réponse</button>
+    </div>
+
+    <div id="numerique">
+     <p>Réponse :</p>
+     <div id="reponse_n" class="saisirReponse">
+       <div class="elementReponse">
+         <input type="number" step=0.01  name = "rep_n"></textarea>
+       </div>
+     </div>
+   </div>
+
+   <button class="bouttonLong" id="ajtQuestion">Ajouter la question</button> 
+ </form>
+
+
+ <div class="bouttonRetour">
+   <p><a href="{{url_for('index', username=username)}}" class="lienRetour">Retour</a></p>
+   <p><a href="{{url_for('login')}}" class="lienRetour">Déconnexion</a></p>
+ </div>
+</section>
+</section>
+{% include "footer.html" %}

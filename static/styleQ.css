@@ -1,0 +1,65 @@
+
+@font-face {
+    font-family: 'Roboto', sans-serif;;
+    src: url('Roboto-Thin.ttf');
+}
+
+@page {
+    size: 7in 9.25in;
+
+}
+
+body{
+    background-color: white;
+    background-attachment: fixed;
+    background-size: cover;
+    font-family: 'Roboto';
+}
+
+
+
+.titre{
+    display: flex;
+    justify-content: center;
+}
+
+
+.questionnaire1{
+    width: 50%;
+    text-align: center;
+    border: 2px solid black;
+}
+
+.Question{
+    padding-left: 10%;
+    padding-right: 10%;
+    margin-bottom: 25px;
+    margin-top: 25px;
+
+}
+
+.question{
+    text-decoration: underline;
+}
+
+.valEnonce{
+    text-align: center;
+}
+
+.reponses{
+    display: flex;
+    flex-direction: column;
+}
+
+.nomRep{
+    display: flex;
+}
+
+.rep{
+    padding-left: 10% ;
+    padding-right: 10% ;
+}
+a:link{
+    text-decoration: none;
+    color: black;
+}

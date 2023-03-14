@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}" /> 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script type="text/javascript" src="{{url_for('static', filename='script.js')}}"></script>
+  <!--CSS pour les checkbox--> <link rel="stylesheet" href="dist/css/checkboxes.min.css">
+  <!-- Bibliotheque pour choisir plusieurs etiquettes de façon intuitive -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <!-- fin bibliotheque etiquette  -->
+  <link rel="icon" href="" type="svg">
+  <!-- Bibliotheque pour LateX -->
+  <script>
+    MathJax = {
+      tex:{
+        inlineMath: [['$','$'],['\\(','\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    }
+  </script>
+  <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <!-- fin bibliotheque LateX -->
+  <!-- Bibliotheque pour Mermaid -->
+  <script src="https://unpkg.com/mermaid@8.5.2/dist/mermaid.min.js"></script>
+  <!-- fin Bibliotheque Mermaid -->
+</head>

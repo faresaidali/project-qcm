@@ -1,0 +1,20 @@
+{% include "header.html" %}
+    <body>
+        <div class="contain">
+            <p id="actLogin">Se connecter</p>
+
+            <form class="register" method="POST" action="/login">
+                <input id = "id" type="text" name="username" placeholder="Ton pseudo">
+                <input id = "id" type="password" name="password" placeholder="Mot de passe">
+                <button id="submit">Connexion</button>
+            </form>
+        </div>
+
+        <div class="contain">
+            <p id="autreLog">
+                Pas de compte ?
+                <a id= "changeLog" href="{{ url_for('register') }}">Créer un compte</a>
+            </p>
+        </div>
+    </body>
+</html>

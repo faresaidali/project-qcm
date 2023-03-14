@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ url_for('static',filename='styleQ.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}" />
+    <script type="text/javascript" src="{{url_for('static', filename='script.js')}}"></script>
+    <link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}" />
+    <link rel="icon" href="" type="svg">
+    <script>
+      MathJax = {
+        tex:{
+          inlineMath: [['$','$'],['\\(','\\)']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      }
+    </script>
+    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script src="https://unpkg.com/mermaid@8.5.2/dist/mermaid.min.js"></script>
+    </head>
+
+    <body>        
+        <section class="contain">
+            <div class="titre">
+                <h1 class="questionnaire1"> <a href = "{{url_for('exporter', username = username)}}">Questionnaire</a></h1>
+            </div>
+            <section action = "http://localhost:5000" method = "post">
+                {% for i in range(questionnaire|length) %}
+                    {% if questionnaire[i]['id'] in liste_question_a_export %}
+                    <section class="Question">
+                        <h4 class="question">Question {{i+1}}</h4>
+                        <h5 class ="enonce">Enoncé :</h5> 
+                        <div class="valEnonce">{{questionnaire[i]['enonce'] | safe}}</div>
+                        <section class ="reponses">
+                            {% for j in range((questionnaire[i]['reponse'] |length)) %}
+                            {%if questionnaire[i]['type'] == "choixMultiple"%}
+                                <section class="nomRep"><input type="checkbox" />
+                                 Réponse {{j+1}}:</section>
+                                <section class="rep">{{questionnaire[i]['reponse'][j][0] | safe}}</section>
+                            {%else%}
+                                <p> Réponse : ......</p>
+                            {%endif%}
+                            {% endfor %}
+                        </section>
+                    </section> 
+                    {% endif %}  
+                {% endfor %}
+            </section>
+        </section>
+    </body>
+</html>

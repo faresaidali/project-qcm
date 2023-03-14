@@ -1,0 +1,12 @@
+<html>
+   <body>
+      <form action = "http://localhost:5000/supprimer" method = "post">
+         <h1>{{ nomQuestion }}</h1>
+         <p>Quelle question voulez-vous supprimer ? </p>
+         <p><input type = "number" name = "suppr" min = 1 max ={{nbQuestion}}/></p>
+         <p><input hidden type = "texte" name = "do" value = "0" /></p>
+         <p><input type = "submit" value = "submit" /></p>
+         <a href="index.html">Retour Index</a> 
+      </form>   
+   </body>
+</html>
