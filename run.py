@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import markdown
 from random import *
-from flask_socketio import SocketIO, emit
+import time
 
 
 UPLOAD_FOLDER = "csv"
@@ -132,43 +132,11 @@ def marquListeDejaExistant(liste_eleve):
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-socket = SocketIO(app)
-test = ['34']
-clients = 0
-
-@app.route('/live')
-def main(): #Page d'entrée dans l'app // Purement décoratif
-    return render_template('live.html')
-
-@socket.on('message')
-def handlemsg(msg):
-    global test
-    print(test[0])
-    emit("message", test[0])
-
-
-
-@socket.on("connect")
-def connect():
-    global clients
-    print("connect")
-    clients += 1
-    emit("users", {"user_count": clients}, broadcast=True)
- 
- 
-@socket.on("disconnect")
-def disconnect():
-    global clients
-    print("disconnect")
-    clients -= 1
-    emit("users", {"user_count": clients}, broadcast=True)
-
 
 @app.route('/')
+
 def home(): #Page d'entrée dans l'app // Purement décoratif
     return render_template('home.html')
-
-
 
 @app.route('/login') 
 def login(): #Fixe la page login.html
@@ -185,7 +153,7 @@ def login_log(): #Permet de saisir son id et son mdp et de se connecter
             if user["role"] == "Professeur":
                 return redirect(url_for('menu', username=username)) #Renvoie vers l'index
             else :
-                return redirect(url_for('gestion', username=username)) #Renvoie vers l'index
+                return redirect(url_for('menuEleve', username=username)) #Renvoie vers l'index
     return redirect(url_for('login')) #Si mdp et id ne correspondent pas, renvoie vers login.html
 
 
@@ -356,7 +324,8 @@ def ajouter(username):
                 "etiquette" : etiquettes,
                 "type" : type,
                 "enonce" : val_enonce,
-                "reponse" : val_rep
+                "reponse" : val_rep,
+                "repEleve" : {}
             }
             questionnaire.append(new_question)
 
@@ -383,6 +352,7 @@ def modifier(username, nom_question_a_modifier):
             type_base = questionnaire[i]["type"]
             reponse_base = questionnaire[i]["reponse"]
             nb_reponse = len(questionnaire[i]["reponse"])
+            repEleve_base = questionnaire[i]["repEleve"]
 
             etiquettes = questionnaire[i]["etiquette"]
     liste_etiquette = listeEtiquette(questionnaire)
@@ -450,6 +420,7 @@ def modifier(username, nom_question_a_modifier):
                         questionnaire[i]['enonce']= val_enonce
                         questionnaire[i]['reponse']= val_rep
                         questionnaire[i]['type']= type
+                        questionnaire[i]['repEleve'] = {}
 
 
 
@@ -629,10 +600,228 @@ def questionnaire(username, liste_question_a_export):
     return render_template('questionnaire.html', username = username, questionnaire = questionnaire, liste_question_a_export = liste_question_a_export)
 
 
-@app.route('/diffuser/<username>') #Non utilisé
+@app.route('/diffuser/<username>', methods=['GET', 'POST'])
 def diffuser(username):
+    questionnaire= ouvrirQuestionnaire(username)
+    if request.method == 'POST':
+        num_a_diff = request.form['num_a_diffuser']
+        with open("questions.json", "r") as file:
+            liste_ID = json.load(file)
+        if num_a_diff in liste_ID :
+            with open("open.json", "r") as file:
+                liste_diffuse = json.load(file)
+            for i in range(len(questionnaire)):
+                if num_a_diff == questionnaire[i]['id']:
+                    if questionnaire[i]['type'] != 'sequence' :
+                        questionnaire[i]['etat'] = 'attente'
+                        questionnaire[i]['repEleve'] = {}
+                        questionnaire[i]['last'] = True
+                        liste_diffuse.append(questionnaire[i])
+                    else :
+                        new_sequence = {
+                            'id' : questionnaire[i]['id'],
+                            'type' : 'sequence',
+                            'commentaire' : questionnaire[i]['commentaire'],
+                            'taille' : len(questionnaire[i]['question']),
+                            'etat' : 'attente',
+                            'enCours' : 0
+                        }
+                        cpt = 0
+                        for j in range(len(questionnaire[i]['question'])):
+                            nom = questionnaire[i]['question'][j]
+                            for h in range(len(questionnaire)) :
+                                if questionnaire[h]['id'] == nom :
+                                    questionnaire[h]['repEleve'] = {}
+                                    if cpt == len(questionnaire[i]['question']) - 1 :
+                                        questionnaire[h]['last'] = True
+                                    else :
+                                        questionnaire[h]['last'] = False
+                                    new_sequence[cpt] = questionnaire [h]
+                                    cpt += 1
+                        liste_diffuse.append(new_sequence)
+
+            with open("open.json", "w") as file:
+                json.dump(liste_diffuse, file)
+            return redirect(url_for('diffuserAttente', username = username, num_a_diff = num_a_diff))
+        else :
+            render_template('diffuser.html', username = username)
+        
     return render_template('diffuser.html', username = username)
 
+@app.route('/diffuserAttente.html/<username>/<num_a_diff>', methods=['GET', 'POST'])
+def diffuserAttente (username, num_a_diff) :
+    if request.method == 'POST' :
+        with open("open.json", "r") as file:
+            liste_diffuse = json.load(file)
+        for i in range(len(liste_diffuse)):
+            if num_a_diff == liste_diffuse[i]['id']:
+                liste_diffuse[i]['etat'] = 'enCours'
+        with open("open.json", "w") as file:
+                json.dump(liste_diffuse, file)
+                
+        return redirect(url_for('diffusionQuestion', username = username, num_a_diff = num_a_diff))
+    return render_template('diffuserAttente.html', username = username, num_a_diff = num_a_diff)
+
+@app.route('/diffusionQuestion/<username>/<num_a_diff>', methods=['GET', 'POST'])
+def diffusionQuestion(username, num_a_diff):
+    with open("open.json", "r") as file:
+                liste_diffuse = json.load(file)
+    for i in range(len(liste_diffuse)):
+        if num_a_diff == liste_diffuse[i]['id']:
+            liste_diffuse[i]['etat'] = 'enCours'
+            if liste_diffuse[i]['type'] != 'sequence' : 
+                questionnaire = liste_diffuse[i]
+            else :
+                enCours = str(liste_diffuse[i]['enCours'])
+                questionnaire = liste_diffuse[i][enCours]
+            with open("open.json", "w") as file:
+                json.dump(liste_diffuse, file)
+
+    return render_template('diffusionQuestion.html', username = username, questionnaire = questionnaire, num_a_diff =  num_a_diff)
+
+@app.route("/resultatQuestion/<username>/<num_a_diff>")
+def resultatQuestion(username, num_a_diff):
+    
+    
+    with open("open.json", "r") as file:
+        liste_diffuse = json.load(file)
+    for i in range(len(liste_diffuse)):
+        if num_a_diff == liste_diffuse[i]['id']:
+            liste_diffuse[i]['etat'] = 'correction'
+            if liste_diffuse[i]['type'] != 'sequence':
+                questionnaire = liste_diffuse[i]
+
+            else :
+
+                enCours = str(liste_diffuse[i]['enCours'])
+                questionnaire = liste_diffuse[i][enCours]
+                liste_diffuse[i]['enCours'] +=1
+    with open("open.json", "w") as file:
+        json.dump(liste_diffuse, file)
+    return render_template('resultatQuestion.html', username = username, num_a_diff = num_a_diff, questionnaire = questionnaire)
+
+@app.route("/annulDiff/<username>/<num_a_diff>", methods = ['GET', 'POST'])
+def annulDiff(username, num_a_diff) :
+    with open("open.json", "r") as file:
+        liste_diffuse = json.load(file)
+    for i in range(len(liste_diffuse)):
+        if num_a_diff == liste_diffuse[i]['id']:
+            index = liste_diffuse.index(liste_diffuse[i])
+
+    del liste_diffuse[index]
+    with open("open.json", "w") as file:
+        json.dump(liste_diffuse, file)
+    return redirect(url_for('diffuser', username = username))
+
+
+
+@app.route("/menuEleve/<username>", methods = ['GET', 'POST'])
+def menuEleve(username):
+    if request.method == 'POST' :
+        num_a_rep = request.form['num_a_rep']
+        with open("questions.json", "r") as file:
+            liste_ID = json.load(file)
+        if num_a_rep in liste_ID :
+            with open("open.json", "r") as file:
+                liste_diffuse = json.load(file)
+            for i in range(len(liste_diffuse)):
+                if liste_diffuse[i]['id'] == num_a_rep :
+                    return redirect(url_for('repondre', username = username, num_a_rep = num_a_rep))
+    return render_template ("menuEleve.html", username = username)
+
+
+@app.route("/repondre/<username>/<num_a_rep>", methods = ['GET', 'POST'])
+def repondre (username, num_a_rep):
+
+    go = False
+    cpt = 1
+    while go == False :
+        print(cpt)
+        cpt +=1 
+        with open("open.json", "r") as file:
+            liste_diffuse = json.load(file)
+        for i in range(len(liste_diffuse)):
+            if liste_diffuse[i]['id'] == num_a_rep :
+                if liste_diffuse[i]['etat'] == 'enCours' :
+                    go = True
+        time.sleep(0.5)
+
+    with open("open.json", "r") as file:
+        liste_diffuse = json.load(file)
+    for i in range(len(liste_diffuse)):
+        if liste_diffuse[i]['id'] == num_a_rep :
+            if liste_diffuse[i]['type'] == 'sequence' :
+                enCours = str(liste_diffuse[i]['enCours'])
+                questionnaire = liste_diffuse[i][enCours] 
+            else :
+                questionnaire = liste_diffuse[i]
+    if request.method == 'POST' :
+        with open("open.json", "r") as file:
+            liste_diffuse = json.load(file)
+        for i in range(len(liste_diffuse)):
+            if liste_diffuse[i]['id'] == num_a_rep :
+                enCours = str(liste_diffuse[i]['enCours'])
+                liste_repEleve = []
+                if questionnaire['type'] == 'choixMultiple' :
+                    for j in range(len(questionnaire['reponse'])):
+                        try : 
+                            val = request.form['check' + str(j)]
+                            val = True
+                        except :
+                            val = False
+                        new_rep = {'name' : questionnaire['reponse'][j][0], 'val' : liste_diffuse[i][enCours]['reponse'][j][1], 'rep' : val}
+                        liste_repEleve.append(new_rep)
+                    if liste_diffuse[i]['type'] == 'sequence':
+                        liste_diffuse[i][enCours]['repEleve'][username] = liste_repEleve
+                    else:
+                        liste_diffuse[i]['repEleve'][username] = liste_repEleve
+                else :
+                    val = request.form['rep_num']
+                    new_rep = {'val' : questionnaire['reponse'][0], 'rep' : val}
+                    liste_repEleve.append(new_rep)
+                    if liste_diffuse[i]['type'] == 'sequence':
+                        liste_diffuse[i][enCours]['repEleve'][username] = liste_repEleve
+                    else:
+                        liste_diffuse[i]['repEleve'][username] = liste_repEleve
+        with open("open.json", "w") as file:
+            json.dump(liste_diffuse, file)
+        return redirect(url_for('reponse', username = username, num_a_rep = num_a_rep))
+
+    return render_template("repondre.html", username = username, questionnaire = questionnaire)
+
+@app.route('/reponse/<username>/<num_a_rep>')
+def reponse (username, num_a_rep) :
+    go = False
+    cpt = 1
+    while go == False :
+        print(cpt)
+        cpt +=1 
+        with open("open.json", "r") as file:
+            liste_diffuse = json.load(file)
+        for i in range(len(liste_diffuse)):
+            if liste_diffuse[i]['id'] == num_a_rep :
+                if liste_diffuse[i]['etat'] == 'correction' :
+                    go = True
+    time.sleep(0.5)
+
+    
+    with open("open.json", "r") as file:
+        liste_diffuse = json.load(file)
+    for i in range(len(liste_diffuse)):
+        if liste_diffuse[i]['id'] == num_a_rep :
+            if liste_diffuse[i]['type'] == 'sequence' :
+                enCours = str(liste_diffuse[i]['enCours'] -1 )
+                questionnaire = liste_diffuse[i][enCours]['repEleve'][username]
+                _type=liste_diffuse[i][enCours]['type']
+            else :
+                questionnaire = liste_diffuse[i]
+                _type=liste_diffuse[i]['type']
+            if liste_diffuse[i][enCours]["last"] == True :
+                last = True
+    print(questionnaire)
+
+    return render_template("reponse.html", username = username, num_a_rep = num_a_rep, questionnaire = questionnaire, _type = _type, last = last)
+    
 
 @app.route('/gestion/<username>', methods=['GET','POST']) #Non utilisé
 def gestion(username):
@@ -754,6 +943,4 @@ def compte(username):
 
 
 if __name__ == '__main__':
-   socket.run(app, debug=True)
-
-
+   app.run(debug = True)

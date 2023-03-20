@@ -1,0 +1,12 @@
+{% include "header.html" %}
+<body>
+    <section action="http://localhost:5000">
+        <form method="post">
+            <p>{{num_a_diff}}</p>
+            <p>Salle d'attente</p>
+            <button type="submit">Lancer</button>
+        </form>
+        <a href="{{url_for('annulDiff', username=username, num_a_diff = num_a_diff)}}"><button type="button">Retour</button></a>
+
+    </section>
+{% include "footer.html" %}

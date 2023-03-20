@@ -1,0 +1,32 @@
+{% include "header.html" %}
+<body>
+    <section action="http://localhost:5000">
+        <section class ="enonce">
+            <div class="valEnonce">
+                <p>{{questionnaire['enonce'] | safe}}</p> <!--Affiche le premier élément de la liste de la valeur associé à la clé (l'énoncé) sous format markdown-->
+            </div>
+        </section>
+
+        <form method="post">
+        {% if questionnaire['type'] != 'numerique'%}
+        <section class ="reponse">
+    
+            {% for j in range((questionnaire['reponse'] |length)) %}
+                <div class="blocReponse">
+                    <input type="checkbox" name="check{{j}}">
+                    <div class="valReponse">
+                        {{questionnaire['reponse'][j][0] | safe}} <!--Affiche les réponses-->
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+        {% else %}
+
+        <p>Insérez une valeur</p>
+        <input type="number" step=0.01  name = "rep_num">
+
+        {% endif %}
+        <button>Valider</button>
+    </form>
+    </section>
+{% include "footer.html" %}

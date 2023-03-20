@@ -1,0 +1,12 @@
+{% include "header.html" %}
+    <body>  
+        <section action = "http://localhost:5000">
+            <p>Répondre à une question</p>
+            <form method="post">
+                <input type="text" name="num_a_rep">
+                <button type="submit">Go !</button>
+            </form>
+
+            <a href="{{url_for('compte', username=username)}}"><button class="bouttonMenu" id="btnCompte" type="button">Mon compte</button></a>
+        </section>
+{% include "footer.html" %}

@@ -1,0 +1,1 @@
+[{"id": "r6OhznMn", "etiquette": ["tg", "temps"], "type": "choixMultiple", "enonce": "<p>quel temps fait-il?</p>", "reponse": [["<p>oui il fait beau</p>", true], ["<p>non il fait pas beau</p>", false]]}, {"id": "hAkHI@h6", "etiquette": ["ivt"], "type": "numerique", "enonce": "<p>blabla bla est il correct</p>", "reponse": [["10221", true]]}]

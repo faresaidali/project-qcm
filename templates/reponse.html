@@ -1,0 +1,32 @@
+{% include "header.html" %}
+    <body>
+        <section action="http://localhost:5000">
+            <section class ="reponse">
+                {% for j in range((questionnaire |length)) %}
+                    
+                    {% if questionnaire[j]['val'][0] == questionnaire[j]['rep'] %}<div style=color:green;>  {% else %}<div style=color:red;>{% endif %}
+                    <div class="blocReponse">
+                        {% if _type != 'numerique'%}
+                        <div class="titreReponse">
+                            Réponse {{j+1}}:
+                        </div>
+                        <div class="valReponse">
+                            {{questionnaire[j]['name'] | safe}} <!--Affiche les réponses-->
+                        </div>
+                        {% else %}
+                        <div class="titreReponse">
+                            Réponse:
+                        </div>
+                        <div class="valReponse">
+                            {{questionnaire[j]['rep'] | safe}} <!--Affiche les réponses-->
+                        </div>
+                        {% endif %}
+                    </div>
+                    </div>
+                    
+                {% endfor %}
+            </section>
+        {% if last != True %}<button> <a href="{{url_for('repondre', username = username, num_a_rep = num_a_rep)}}">Prochaine Question</a></button>{% endif %}
+        <p><a href="{{url_for('menuEleve', username=username)}}" class="lienRetour">Retour</a></p>
+
+{% include "footer.html" %}

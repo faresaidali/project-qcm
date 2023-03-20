@@ -1,0 +1,54 @@
+{% include "header.html" %}
+    <body>
+        <section action="http://localhost:5000">
+            {% if questionnaire['type'] != 'sequence' %}
+            <section class ="enonce">
+                <div class="valEnonce">
+                    <p>{{questionnaire['enonce'] | safe}}</p> <!--Affiche le premier élément de la liste de la valeur associé à la clé (l'énoncé) sous format markdown-->
+                </div>
+            </section>
+            {% if questionnaire['type'] != 'numerique'%}
+            <section class ="reponse">
+                {% for j in range((questionnaire['reponse'] |length)) %}
+                    <div class="blocReponse">
+                        <div class="titreReponse">
+                            Réponse {{j+1}}:
+                        </div>
+                        <div class="valReponse">
+                            {{questionnaire['reponse'][j][0] | safe}} <!--Affiche les réponses-->
+                        </div>
+                    </div>
+                {% endfor %}
+            </section>
+            {% endif %}
+        <button type="button">Voir les réponses</button>
+        <a href="{{url_for('resultatQuestion', username=username, num_a_diff = num_a_diff)}}"><button type="button">Arrêter de répondre</button></a>
+        {% else %}
+
+        <section class ="enonce">
+            <div class="valEnonce">
+                <p>{{questionnaire['enonce'] | safe}}</p> <!--Affiche le premier élément de la liste de la valeur associé à la clé (l'énoncé) sous format markdown-->
+            </div>
+        </section>
+        {% if questionnaire['type'] != 'numerique'%}
+        <section class ="reponse">
+            {% for j in range((questionnaire['reponse'] |length)) %}
+                <div class="blocReponse">
+                    <div class="titreReponse">
+                        Réponse {{j+1}}:
+                    </div>
+                    <div class="valReponse">
+                        {{questionnaire['reponse'][j][0] | safe}} <!--Affiche les réponses-->
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+        <button type="button">Voir les réponses</button>
+        <a href="{{url_for('resultatQuestion', username=username, num_a_diff = num_a_diff)}}"><button type="button">Arrêter de répondre</button></a>
+        {% endif %}
+        <a href="{{url_for('annulDiff', username=username, num_a_diff = num_a_diff)}}"><button type="button">Retour</button></a>
+       
+        </section>
+    
+{% include "footer.html" %}

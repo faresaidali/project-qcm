@@ -1,0 +1,34 @@
+{% include "header.html" %}
+    <body>
+        <section action="http://localhost:5000">
+            <section class ="enonce">
+                <div class="valEnonce">
+                    <p>{{questionnaire['enonce'] | safe}}</p> <!--Affiche le premier élément de la liste de la valeur associé à la clé (l'énoncé) sous format markdown-->
+                </div>
+            </section>
+
+            <section class ="reponse">
+                {% for j in range((questionnaire['reponse'] |length)) %}
+                    {% if questionnaire['reponse'][j][1] == True %}<div style=color:green;> {% endif %}
+                    <div class="blocReponse">
+                        <div class="titreReponse">
+                            Réponse {% if questionnaire['type'] != 'numerique'%}{{j+1}}{% endif %}:
+                        </div>
+                        <div class="valReponse">
+                            {{questionnaire['reponse'][j][0] | safe}} <!--Affiche les réponses-->
+                        </div>
+                    </div>
+                    {% if questionnaire['reponse'][j][1] == True %} </div> {% endif %}
+                    
+                {% endfor %}
+            </section>
+            <a href="{{url_for('annulDiff', username=username, num_a_diff = num_a_diff)}}"><button type="button">Retour</button></a>
+
+
+        
+    {% if questionnaire['last'] == False %}<a href="{{url_for('diffusionQuestion', username = username, num_a_diff = num_a_diff)}}"><button type="button">Prochaine Question</button></a> {% endif %}
+    <a href="{{url_for('annulDiff', username=username, num_a_diff = num_a_diff)}}"><button type="button">Retour</button></a>
+
+    </section>
+    
+{% include "footer.html" %}
