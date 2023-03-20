@@ -603,6 +603,8 @@ def questionnaire(username, liste_question_a_export):
 @app.route('/diffuser/<username>', methods=['GET', 'POST'])
 def diffuser(username):
     questionnaire= ouvrirQuestionnaire(username)
+    sequences = [seq for seq in questionnaire if seq['type'] == 'sequence']
+    questions = [q for q in questionnaire if q['type'] == 'choixMultiple' or q['type'] == 'numérique']
     if request.method == 'POST':
         num_a_diff = request.form['num_a_diffuser']
         with open("questions.json", "r") as file:
@@ -646,7 +648,7 @@ def diffuser(username):
         else :
             render_template('diffuser.html', username = username)
         
-    return render_template('diffuser.html', username = username)
+    return render_template('diffuser.html', username = username, sequences = sequences, questions = questions, questionnaire = questionnaire)
 
 @app.route('/diffuserAttente.html/<username>/<num_a_diff>', methods=['GET', 'POST'])
 def diffuserAttente (username, num_a_diff) :
