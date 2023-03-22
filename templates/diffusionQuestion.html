@@ -50,5 +50,52 @@
         <a href="{{url_for('annulDiff', username=username, num_a_diff = num_a_diff)}}"><button type="button">Retour</button></a>
        
         </section>
+        <h2>Nombres de Reponses</h2>
+        <h1 id='nbreReponse'></h1>
+        <table>
+            <thead>
+              <tr>
+                <th>Reponses</th>
+              </tr>
+            </thead>
+            <tbody id="cptReponses">
+            </tbody>
+          </table>
+        <h2>Nombre de Connexions</h2>
+        <h1 id='user_counter'></h1>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+        <script>
+            socket = io("http://127.0.0.1:5000/diffusionQuestion");
+            socket.connect('http:/127.0.0.1:5000/diffusionQuestion')
+            socket.on('connect', function(){
+                console.log('Client connecté');
+                socket.send('a');
+            })
+    
+            socket.on("connect_error", (err) => {
+                console.log(`connect_error due to ${err.message}`);
+            })
+        
+            socket.on("message", (msg) => {
+                console.log(msg); // world
+                live = document.getElementById('nbreReponse');
+                live.innerHTML = msg.num_responses;
+                $('#cptReponses').empty();
+                for (var rep in msg.name_counts) {
+                    var cpt = msg.name_counts[rep];
+                    var row = '<tr><td>' + rep + '</td><td>' + cpt + '</td></tr>';
+                    $('#cptReponses').append(row);
+                }
+            });
+            socket.on('disconnect', function(){
+                console.log('Client deconnecté');
+            })
+            socket.on('users', function(users) {
+                    userCount = document.getElementById('user_counter');
+                    userCount.innerHTML = users.user_count;
+            })
+        </script>
     
 {% include "footer.html" %}

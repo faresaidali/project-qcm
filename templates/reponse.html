@@ -4,7 +4,7 @@
             <section class ="reponse">
                 {% for j in range((questionnaire |length)) %}
                     
-                    {% if questionnaire[j]['val'][0] == questionnaire[j]['rep'] %}<div style=color:green;>  {% else %}<div style=color:red;>{% endif %}
+                    {% if questionnaire[j]['val'] == questionnaire[j]['rep'] %}<div style=color:green;>  {% else %}<div style=color:red;>{% endif %}
                     <div class="blocReponse">
                         {% if _type != 'numerique'%}
                         <div class="titreReponse">

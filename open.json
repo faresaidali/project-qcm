@@ -1,1 +1,1 @@
-[]
+[{"id": "qhBowZXz", "etiquette": ["math", "seconde"], "type": "choixMultiple", "enonce": "<p>$$e^{i\\pi}+1=0$$</p>", "reponse": [["<p>A</p>", false], ["<p>B</p>", true]], "repEleve": {"13425": [{"name": "<p>A</p>", "val": false, "rep": true}, {"name": "<p>B</p>", "val": true, "rep": false}], "2001": [{"name": "<p>A</p>", "val": false, "rep": false}, {"name": "<p>B</p>", "val": true, "rep": true}]}, "etat": "enCours", "last": true}]
