@@ -136,6 +136,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'test'
 socket = SocketIO(app, cors_allowed_origins="*")
 clients = 0
+repondre_clients = 0
 last_modified = 0
 
 @app.route('/')
@@ -693,15 +694,16 @@ def diffusionQuestion(username, num_a_diff):
 @socket.on('message', namespace="/diffusionQuestion")
 def handlemsg(msg):
     global last_modified
-    while True:
-        # Get the modification time of the file
+    # Verifier continuellement si le fichier 'open.json' a été modifié
+    while True: 
+        # Heure de modification du fichier
         modified_time = os.path.getmtime('open.json')
-        # Compare the modification time to the previous time
+        # Comparer l'heure de modification avec l'heure précédente
         if modified_time > last_modified:
-            # Reload the data from the file
+            # Recharger les données du fichier
             with open('open.json', 'r') as f:
                 data = json.load(f)
-            # Update the last modified time
+            # Mettre à jour l'heure de modification
             last_modified = modified_time
 
             response_set = set()
@@ -710,50 +712,24 @@ def handlemsg(msg):
                 response_set.update(item['repEleve'].keys())
                 for person in item['repEleve'].values():
                     for answer in person:
-                        if answer['val']:
+                        if answer['rep']:
                             name = answer['name']
                             if name in name_counts:
                                 name_counts[name] += 1
                             else:
                                 name_counts[name] = 1
             num_responses = len(response_set)
-            # Create a dictionary containing the extracted information
+            # Créer un dictionnaire contenant les informations extraites
             extracted_data = {
                 'num_responses': num_responses,
                 'name_counts': name_counts
             }
 
-            # Emit a SocketIO event with the updated data
+            # Émettre un événement SocketIO avec les données mises à jour
             emit('message', extracted_data)
+        # Attendre 1 seconde avant de vérifier à nouveau
         time.sleep(1)
-    '''
-    print(f"Previous modification time: {last_modified}")
-    # Get the modification time of the file
-    modified_time = os.path.getmtime('open.json')
-    print(f"Current modification time: {modified_time}")
-    # Compare the modification time to the previous time
-    if modified_time > last_modified:
-        # Reload the data from the file
-        with open('open.json', 'r') as f:
-            data = json.load(f)
-        # Update the last modified time
-        last_modified = modified_time
-        # Emit a SocketIO event with the updated data
-        emit('message', data)
-    '''
-        
-    #with open('open.json', 'r') as f:
-    #    data = json.load(f)
-    #extracted_data = []
-    #for item in data:
-    #    extracted_item = {
-    #        'id': item['id'],
-    #        'etiquette': item['etiquette'],
-    #        'enonce': item['enonce']
-    #    }
-    #    extracted_data.append(extracted_item)
-    #print(jsonify(extracted_data) )
-    #emit("message", extracted_data, broadcast=True)
+
 
 
 
@@ -918,6 +894,20 @@ def repondre (username, num_a_rep):
         return redirect(url_for('reponse', username = username, num_a_rep = num_a_rep))
 
     return render_template("repondre.html", username = username, questionnaire = questionnaire)
+
+@socket.on("connect", namespace="/repondre")
+def connect_repondre():
+    global repondre_clients
+    print("connect_repondre")
+    repondre_clients += 1
+    emit("repondre_users", {"user_count": repondre_clients}, broadcast=True)
+
+@socket.on("disconnect", namespace="/repondre")
+def disconnect_repondre():
+    global repondre_clients
+    print("disconnect_repondre")
+    repondre_clients -= 1
+    emit("repondre_users", {"user_count": repondre_clients}, broadcast=True)
 
 
 @app.route('/reponse/<username>/<num_a_rep>')
