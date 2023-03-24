@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 import os
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, session
 import codecs
 import json
 import csv
@@ -133,7 +133,7 @@ def marquListeDejaExistant(liste_eleve):
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SECRET_KEY'] = 'test'
+app.secret_key = "a75227075ce0c46a039511eb5118b206417e937e90bcc638548f462c74ba2bca"
 socket = SocketIO(app, cors_allowed_origins="*")
 clients = 0
 repondre_clients = 0
@@ -144,27 +144,42 @@ last_modified = 0
 def home(): #Page d'entrée dans l'app // Purement décoratif
     return render_template('home.html')
 
-@app.route('/login') 
-def login(): #Fixe la page login.html
-    return render_template('login.html')
-
-@app.route('/login', methods=['POST'])
-def login_log(): #Permet de saisir son id et son mdp et de se connecter
-    username = request.form.get('username') #Récupère l'id
-    password = request.form.get('password')
+@app.route('/login', methods=['POST','GET'])
+def login(): #Permet de saisir son id et son mdp et de se connecter
+    
     with open("users.json", "r") as file:
         users = json.load(file)
-    for user in users: #vérifie que le le mdp correspond à l'id
-        if user["username"] == username and check_password_hash(user["password"], password):
-            if user["role"] == "Professeur":
-                return redirect(url_for('menu', username=username)) #Renvoie vers l'index
-            else :
-                return redirect(url_for('menuEleve', username=username)) #Renvoie vers l'index
-    return redirect(url_for('login')) #Si mdp et id ne correspondent pas, renvoie vers login.html
+
+    if request.method == "POST":
+        username = request.form.get('username') #Récupère l'id
+        password = request.form.get('password')
+
+        for user in users: #vérifie que le le mdp correspond à l'id
+            if user["username"] == username and check_password_hash(user["password"], password):
+                if user["role"] == "Professeur":
+                    session['username'] = user['username']
+                    print(session) 
+                    return redirect(url_for('menu', username=username)) #Renvoie vers l'index
+                else :
+                    session['username'] = user['username']
+                    print(session)
+                    return redirect(url_for('gestion', username=username)) #Renvoie vers l'index
+        return render_template("login.html")
+    else:
+        if 'username'in session:
+            for user in users: 
+                if user["username"] == session['username']:
+                    if user["role"] == "Professeur":
+                        return redirect(url_for('menu', username = session['username']))
+                    else :
+                        return redirect(url_for('gestion', username = session['username']))
+        return render_template("login.html")
 
 
-@app.route('/logout') #Non utilisé
+@app.route('/logout') #Deconnexion
 def logout():
+    session.pop('username', None)
+    print(session)
     return redirect(url_for('home'))
 
 @app.route('/register')
@@ -217,9 +232,13 @@ def register_reg(): #Créer un compte utilisateur en saisissant un username et u
 
     return redirect(url_for('login'))
 
-@app.route('/menu/<username>') #Non utilisé
+@app.route('/menu/<username>') 
 def menu(username):
-    return render_template('menu.html', username = username)
+    print(session)
+    if username == session['username']:
+        return render_template('menu.html', username = session['username'])
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/index/<username>', methods = ['POST', 'GET']) #page principale
 def index(username): 
@@ -1106,10 +1125,30 @@ def creation(username):
         return redirect(url_for('gestion', username = username))
     return render_template('creation.html', username = username, liste_eleve = liste_eleve, liste_doublon = liste_doublon, liste_ID_deja_existant = liste_ID_deja_existant)
 
-@app.route('/compte/<username>') #Non utilisé
+@app.route('/compte/<username>') 
 def compte(username):
     return render_template('compte.html', username = username)
 
+@app.route('/compte/<username>', methods=['POST'])
+def change_mdp(username):
+    old_password = request.form.get('old_password')
+    new_password = request.form.get('new_password')
+
+    with open('users.json','r') as file:
+        users = json.load(file)
+    
+    for user in users:
+        if user["username"] == username and check_password_hash(user["password"], old_password):
+            if len(new_password) >= 4 and new_password != old_password:
+                user["password"] = generate_password_hash(new_password, method='sha256')
+                with open('users.json', 'w') as file:
+                    json.dump(users, file)
+                return redirect(url_for('compte', username = username))
+            else:
+                return "Le mot de passe doit contenir plus de 4 caractères et etre différent de l'ancien mdp"
+
+
+    return "c'est pas le bon mdp"
 
 
 if __name__ == '__main__':

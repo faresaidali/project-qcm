@@ -1,1 +1,16 @@
-compte
+{% include "header.html" %}
+<body>
+    <div class="contain">
+        <div class="contain">
+            <form class="changePassword" method="POST" action="{{ change_mdp }}">
+                <h2 id="actPassword">Changer son mot de passe</h2>
+                <input id="id" type="password" name="old_password" placeholder="ancien mot de passe" required>
+                <input id="id" type="password" name="new_password" placeholder="nouveau mot de passe" required>
+                <button id="submit">Confirmer</button>
+            </form>
+        </div>
+    </div>
+    <div class="contain">
+        <p><a id="retour" href="{{url_for('menu', username=username) }}"> Retour </a></p>
+    </div>
+</body>
