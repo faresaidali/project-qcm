@@ -612,6 +612,7 @@ def questionnaire(username, liste_question_a_export):
 @app.route('/diffuser/<username>', methods=['GET', 'POST'])
 def diffuser(username):
     questionnaire= ouvrirQuestionnaire(username)
+    liste_etiquette = listeEtiquette(questionnaire)
     if request.method == 'POST':
         num_a_diff = request.form['num_a_diffuser']
         with open("questions.json", "r") as file:
@@ -653,9 +654,9 @@ def diffuser(username):
                 json.dump(liste_diffuse, file)
             return redirect(url_for('diffuserAttente', username = username, num_a_diff = num_a_diff))
         else :
-            render_template('diffuser.html', username = username)
+            render_template('diffuser.html', username = username, questionnaire = questionnaire, liste_etiquette = liste_etiquette)
         
-    return render_template('diffuser.html', username = username)
+    return render_template('diffuser.html', username = username, questionnaire = questionnaire, liste_etiquette = liste_etiquette)
 
 @app.route('/diffuserAttente.html/<username>/<num_a_diff>', methods=['GET', 'POST'])
 def diffuserAttente (username, num_a_diff) :
@@ -694,8 +695,8 @@ def diffusionQuestion(username, num_a_diff):
 @socket.on('message', namespace="/diffusionQuestion")
 def handlemsg(msg):
     global last_modified
-    # Verifier continuellement si le fichier 'open.json' a été modifié
-    while True: 
+    # Vérifier continuellement si le fichier 'open.json' a été modifié
+    while True:
         # Heure de modification du fichier
         modified_time = os.path.getmtime('open.json')
         # Comparer l'heure de modification avec l'heure précédente
@@ -708,17 +709,55 @@ def handlemsg(msg):
 
             response_set = set()
             name_counts = {}
+
             for item in data:
-                response_set.update(item['repEleve'].keys())
-                for person in item['repEleve'].values():
-                    for answer in person:
-                        if answer['rep']:
-                            name = answer['name']
+                if item['type'] == 'sequence':
+                    current_key = str(item['enCours'])
+                    current_item = item[current_key]
+
+                    if current_item['type'] == 'choixMultiple':
+                        response_set.update(current_item['repEleve'].keys())
+                        for person in current_item['repEleve'].values():
+                            for answer in person:
+                                if answer['rep']:
+                                    name = answer['name']
+                                    if name in name_counts:
+                                        name_counts[name] += 1
+                                    else:
+                                        name_counts[name] = 1
+
+                    elif current_item['type'] == 'numerique':
+                        response_set.update(current_item['repEleve'].keys())
+                        for person in current_item['repEleve'].values():
+                            for answer in person:
+                                name = answer['rep']
+                                if name in name_counts:
+                                    name_counts[name] += 1
+                                else:
+                                    name_counts[name] = 1
+
+                elif item['type'] == 'choixMultiple':
+                    response_set.update(item['repEleve'].keys())
+                    for person in item['repEleve'].values():
+                        for answer in person:
+                            if answer['rep']:
+                                name = answer['name']
+                                if name in name_counts:
+                                    name_counts[name] += 1
+                                else:
+                                    name_counts[name] = 1
+                elif item['type'] == 'numerique':
+                    response_set.update(item['repEleve'].keys())
+                    for person in item['repEleve'].values():
+                        for answer in person:
+                            name = answer['rep']
                             if name in name_counts:
                                 name_counts[name] += 1
                             else:
                                 name_counts[name] = 1
+
             num_responses = len(response_set)
+
             # Créer un dictionnaire contenant les informations extraites
             extracted_data = {
                 'num_responses': num_responses,
@@ -729,6 +768,7 @@ def handlemsg(msg):
             emit('message', extracted_data)
         # Attendre 1 seconde avant de vérifier à nouveau
         time.sleep(1)
+
 
 
 
@@ -822,14 +862,19 @@ def menuEleve(username):
                     return redirect(url_for('repondre', username = username, num_a_rep = num_a_rep))
     return render_template ("menuEleve.html", username = username)
 
+@app.route('/get_qcm_status', methods=['GET'])
+def get_qcm_status(username):
+    with open("open.json", "r") as f:
+        data = json.load(f)
+    return jsonify(status=data["etat"])
+
 
 @app.route("/repondre/<username>/<num_a_rep>", methods = ['GET', 'POST'])
 def repondre (username, num_a_rep):
-
     go = False
     cpt = 1
     while go == False :
-        print(cpt)
+        #print(cpt)
         cpt +=1 
         with open("open.json", "r") as file:
             liste_diffuse = json.load(file)

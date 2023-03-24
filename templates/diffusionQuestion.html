@@ -115,7 +115,7 @@
                 {% endfor %}
             </section>
             {% endif %}
-        <button type="button">Voir les réponses</button>
+        <button id="toggleButton">Voir les réponses</button>
         <a href="{{url_for('resultatQuestion', username=username, num_a_diff = num_a_diff)}}"><button type="button">Arrêter de répondre</button></a>
         {% else %}
 
@@ -147,8 +147,10 @@
         <div class="right-column">
         <h2>Nombres de Reponses</h2>
         <h1 id='nbreReponse'></h1>
-        <h2>Répartition des réponses</h2>
-        <canvas id="reponseChart"></canvas>
+        <!-- <div id="afficherRep" style="display: none;"> -->
+            <h2>Répartition des réponses</h2>
+            <canvas id="reponseChart"></canvas>
+        <!-- </div> -->
 
         <h2>Nombre de Connexions</h2>
         <h1 id='user_counter'></h1>
@@ -246,6 +248,20 @@
                 userCount = document.getElementById('user_counter');
                 userCount.innerHTML = users.user_count;
             });
+
+            const toggleButton = document.getElementById("toggleButton");
+            const afficher = document.getElementById("afficherRep");
+
+            toggleButton.addEventListener("click", function() {
+                if (afficher.style.display === "none") {
+                    afficher.style.display = "block";
+                    toggleButton.textContent = "Masquer Réponses";
+                } else {
+                    afficher.style.display = "none";
+                    toggleButton.textContent = "Voir Réponses";
+                }
+            });
+
         </script>
     
 {% include "footer.html" %}

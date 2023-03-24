@@ -10,6 +10,16 @@ $(document).ready(function() {
     });
 });
 
+$(document).ready(function() {
+  $('.filtreEtiquette1').select2({
+  });
+});
+
+$(document).ready(function() {
+  $('.filtreEtiquette2').select2({
+  });
+});
+
 
 
 (function (d) {
