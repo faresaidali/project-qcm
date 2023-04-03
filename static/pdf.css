@@ -1,0 +1,25 @@
+body {
+    font-family: Arial, sans-serif;
+   }
+   
+   h3 {
+    margin-top: 0;
+   }
+   
+   div.control {
+    padding: 20px;
+    margin-bottom: 20px;
+   }
+   
+   div.question {
+    margin-bottom: 20px;
+   }
+   
+   p.enonce {
+    font-weight: bold;
+   }
+   
+   div.reponse {
+    margin-bottom: 5px;
+   }
+   

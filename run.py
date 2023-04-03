@@ -1,6 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, Response, jsonify
 import os
-from flask import render_template, request, redirect, url_for, session
+from flask import render_template, request, redirect, url_for, session, send_file, make_response
 import codecs
 import json
 import csv
@@ -8,12 +8,16 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import markdown
 from random import *
+import random
 import time
 from flask_socketio import SocketIO, emit
+from itertools import combinations
+import pdfkit
 
 
 UPLOAD_FOLDER = "csv"
 ALLOWED_EXTENSIONS = {'csv'}
+
 
 def ouvrirQuestionnaire(user): #Ouvre le fichier {user}.json contenant le questionnaire d'un utilisateur & renvoie (dict) le questionnaire sous le format dict
     fichier=None
@@ -73,6 +77,72 @@ def listeEtiquette (questionnaire):
                 if (questionnaire[i]["etiquette"][j] not in liste_etiquette) :
                     liste_etiquette.append(questionnaire[i]["etiquette"][j])
     return liste_etiquette
+
+def triEtiquette(questionnaire):
+    tri_questions = {}
+
+    for question in questionnaire:
+        if question["type"] in ["numerique", "choixMultiple"]:
+            for etiquette in question["etiquette"]:
+                if etiquette not in tri_questions:
+                    tri_questions[etiquette] = []
+                tri_questions[etiquette].append(question["id"])
+
+    return tri_questions
+
+def get_combinaisons(questionnaire, count):
+    return list(combinations(questionnaire, count))
+
+def generer_controles(etiquettes_choisis, nb_controles, tri_questions):
+    all_combinations = set()
+
+    # Liste des questions uniques pour chaque étiquette
+    questions_unique = {}
+    for etiquette in etiquettes_choisis:
+        questions = tri_questions[etiquette]
+        questions_set = set(questions) # creer un ensemble pour Enlèver les doublons
+        questions_list = list(questions_set) # re-transformer en liste
+        questions_unique[etiquette] = questions_list
+
+
+    max_attempts = 1000  # Limite le nombre d'essais pour éviter les boucles infinies
+    attempts = 0
+    while len(all_combinations) < nb_controles and attempts < max_attempts:
+        control_questions = []
+        for label, count in etiquettes_choisis.items():
+            control_questions.extend(random.sample(questions_unique[label], count))
+
+        random.shuffle(control_questions)
+        all_combinations.add(tuple(control_questions))  # Ajoute le contrôle au set, en s'assurant qu'il est unique
+        attempts += 1
+
+    print(len(all_combinations))
+    if len(all_combinations) < nb_controles:
+        return None
+
+    controles = random.sample(list(all_combinations), nb_controles)
+    return controles
+
+def generer_controles_html(control_ids, questionnaire):
+    control_html = ""
+    for question_id in control_ids:
+        for question in questionnaire:
+            if question['id'] == question_id:
+                control_html += f"<div class='question'>"
+                control_html += f"<p class='enonce'>{question['enonce']}</p>"
+                control_html += "<section>"
+                for j, reponse in enumerate(question['reponse']):
+                    control_html += f"<div class='reponse'>"
+                    control_html += f"<input type='checkbox' id='reponse_{j+1}' name='reponse_{j+1}'>"
+                    control_html += f"<label for='reponse_{j+1}'>{reponse[0]}</label>"
+                    control_html += "</div>"
+                control_html += "</section>"
+                control_html += "</div>"
+                break
+    return control_html
+
+
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -626,6 +696,74 @@ def questionnaire(username, liste_question_a_export):
         #questionnaire["Question " + str(i+1)]=questionnaireOrigine[liste_question_a_export[i]]
     
     return render_template('questionnaire.html', username = username, questionnaire = questionnaire, liste_question_a_export = liste_question_a_export)
+
+
+@app.route('/creationControle/', methods=['GET', 'POST'])
+def creationControle():
+    print("Entered creationControle function") 
+    questionnaire = ouvrirQuestionnaire('faresaidali1')
+    liste_etiquette = listeEtiquette(questionnaire)
+    tri_questions = triEtiquette(questionnaire)
+    if request.method == 'POST':
+        etiquettes_choisis = {}
+        for label in liste_etiquette:
+            count = request.form.get(f"{label}_count", type=int)
+            if count is not None:
+                etiquettes_choisis[label] = count
+
+        nb_controles = int(request.form['subject_count'])
+
+        subjects = generer_controles(etiquettes_choisis, nb_controles, tri_questions)
+        session['controls'] = subjects
+        return render_template('creationControle.html', subjects=subjects, liste_etiquette=liste_etiquette)
+    
+
+
+    return render_template('creationControle.html', liste_etiquette=liste_etiquette)
+
+
+@app.route('/controles_pdf')
+def download_controls_pdf():
+    questionnaire = ouvrirQuestionnaire('faresaidali1')
+    controls = session.get('controls', None)
+
+    if controls is None:
+        return redirect(url_for('creationControle'))
+
+    controls_html = ""
+    for control_ids in controls:
+        controls_html += "<div class='control'>"
+        controls_html += "<h3>Devoir</h3>"
+        controls_html += "<p>Numéro étudiant : <input type='text' name='num_etudiant'></p>"
+        control_html = generer_controles_html(control_ids, questionnaire)
+        controls_html += f"<div>{control_html}</div>"
+        controls_html += "</div>"
+        controls_html += "<div style='page-break-after: always;'></div>"
+
+    html_string = f'''
+    <!doctype html>
+    <html>
+        <head>
+        </head>
+        <body>
+            {controls_html}
+        </body>
+    </html>
+    '''
+
+    css_path = os.path.join("static", "pdf.css")
+
+    options = {
+        '--user-style-sheet': css_path
+    }
+
+    pdf = pdfkit.from_string(html_string, False, options=options)
+
+    response = Response(pdf, content_type='application/pdf')
+    response.headers['Content-Disposition'] = 'inline; filename=controles.pdf'
+    return response
+
+
 
 
 @app.route('/diffuser/<username>', methods=['GET', 'POST'])

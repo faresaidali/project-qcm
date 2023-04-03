@@ -1,11 +1,69 @@
 {% set page_title = "Salle d'attente" %}
 {% include "header.html" %}
+{% include "sidebar.html" %}
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .salle-attente {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 350px;
+            padding: 40px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        }
+
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 1em;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1em;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
 <body>
     <section action="http://localhost:5000">
         <form method="post">
-            <p>{{num_a_diff}}</p>
-            <p>Salle d'attente</p>
-            <button type="submit">Lancer</button>
+            <div class="salle-attente">
+                <h1>Bienvenue dans la salle d'attente</h1>
+                <p>{{num_a_diff}}</p>
+                <p>Lancez la question quand vous etes pret</p>
+                <button type="submit">Lancer</button>
+            </div>
         </form>
         <a href="{{url_for('annulDiff', username=username, num_a_diff = num_a_diff)}}"><button type="button">Retour</button></a>
 

@@ -20,6 +20,11 @@ $(document).ready(function() {
   });
 });
 
+$(document).ready(function() {
+  $('.labels').select2({
+  });
+});
+
 
 
 (function (d) {

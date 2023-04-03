@@ -1,0 +1,120 @@
+{% set page_title = "Generer Controles" %}
+{% include "header.html" %}
+{% include "sidebar.html" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 20px;
+        }
+
+        form {
+            margin-bottom: 40px;
+        }
+
+        select, input[type="number"], input[type="submit"] {
+            font-size: 16px;
+            padding: 5px;
+        }
+
+        select {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        input[type="submit"] {
+            cursor: pointer;
+            background-color: #007BFF;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-transform: uppercase;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        button {
+            cursor: pointer;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        ol {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generer Controles</h1>
+
+    <form action="/creationControle" method="post" id="qcm-form">
+        <h3>Choisissez les étiquettes :</h3>
+        <select id="labels" name="createSubject" class="" multiple>
+            <option value=""></option>
+            {% for label in liste_etiquette %}
+            <option value="{{ label }}">{{ label | safe }}</option>
+            {% endfor %}
+        </select>
+        <div id="label-inputs"></div>
+        <div>
+            <label for="subject_count">Nombre de sujets :</label>
+            <input type="number" id="subject_count" name="subject_count" min="1">
+        </div>
+        <input type="submit" value="Générer">
+    </form>
+
+    {% if subjects %}
+    <h2>Sujets générés :</h2>
+    <ol>
+        {% for subject in subjects %}
+            <li>{{ subject }}</li>
+        {% endfor %}
+    </ol>
+    {% endif %}
+    <button onclick="window.location.href='/controles_pdf'">Télécharger le PDF</button>
+
+    <script>
+        const labelsSelect = document.getElementById("labels");
+        const labelInputsContainer = document.getElementById("label-inputs");
+
+        function updateLabelInputs() {
+            labelInputsContainer.innerHTML = "";
+
+            for (const option of labelsSelect.selectedOptions) {
+                const div = document.createElement("div");
+                const label = document.createElement("label");
+                label.htmlFor = option.value;
+                label.textContent = option.textContent + " :";
+
+                const input = document.createElement("input");
+                input.type = "number";
+                input.id = option.value;
+                input.name = option.value + "_count"; // Ajoutez un suffixe pour différencier les champs de saisie de nombre
+                input.min = "0";
+
+                div.appendChild(label);
+                div.appendChild(input);
+                labelInputsContainer.appendChild(div);
+            }
+        }
+
+        labelsSelect.addEventListener("change", updateLabelInputs);
+    </script>
+</body>
+</html>
+
